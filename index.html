@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🧠 Project Merlin Quiz – Test Your Knowledge!</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent: #2fc3ff;        /* cool blue */
+    --accent-2: #7b4bff;      /* purple tint */
+    --warm: #ffb86b;          /* candle warm */
+    --card-bg: rgba(6,10,20,0.72);
+    --muted: rgba(255,255,255,0.75);
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Arial,Helvetica,sans-serif;
+    color:#fff;
+    background: #000;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* full-screen background image (replace background.jpg with your file or URL) */
+  .bg{
+    position:fixed;
+    inset:0;
+    background-image: url("background.jpg"); /* <-- replace with your background image filename or URL */
+    background-size:cover;
+    background-position:center center;
+    filter: saturate(1.02) contrast(0.95);
+    z-index:-2;
+  }
+  /* soft overlay to improve readability and match mood */
+  .overlay{
+    position:fixed; inset:0;
+    background: linear-gradient(180deg, rgba(4,8,20,0.4) 0%, rgba(8,6,20,0.6) 60%, rgba(6,4,12,0.8) 100%);
+    z-index:-1;
+    backdrop-filter: blur(6px) saturate(1.05);
+  }
+
+  .wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 20px;
+  }
+
+  .card{
+    width:100%;
+    max-width:980px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));
+    border-radius:14px;
+    padding:28px;
+    box-shadow: 0 10px 40px rgba(2,6,20,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    gap:20px;
+  }
+
+  /* left - quiz area */
+  .quiz-area{
+    padding:18px 12px;
+  }
+
+  header.title{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .logo{
+    width:66px; height:66px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:28px;
+    color:#051023;
+    box-shadow: 0 6px 18px rgba(47,195,255,0.12);
+  }
+
+  h1{margin:0;font-size:20px;letter-spacing:-0.2px}
+  p.lead{margin:6px 0 18px;color:var(--muted);font-size:14px}
+
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .progress{
+    flex:1;
+    height:10px;
+    background:var(--glass);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress > i{
+    display:block;
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg,var(--accent),var(--accent-2));
+    border-radius:999px;
+    transition:width .5s ease;
+  }
+  .meta{
+    font-size:13px;color:var(--muted);
+    min-width:90px;text-align:right;
+  }
+
+  .question{
+    font-size:18px;margin:6px 0 18px;line-height:1.35;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+  }
+
+  .options{
+    display:grid;gap:12px;margin-top:12px;
+  }
+
+  .option{
+    background: rgba(255,255,255,0.03);
+    padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    cursor:pointer;user-select:none; transition:transform .12s ease, box-shadow .12s ease;
+    display:flex;align-items:center;gap:12px;
+  }
+  .option:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(2,6,20,0.5)}
+  .option.selected{outline:2px solid rgba(47,195,255,0.14); box-shadow: 0 8px 28px rgba(47,195,255,0.06)}
+  .option.correct{background:linear-gradient(90deg, rgba(47,195,255,0.12), rgba(123,75,255,0.06)); border:1px solid rgba(47,195,255,0.18);}
+  .option.wrong{opacity:0.8;filter:grayscale(.2);}
+
+  .controls{
+    display:flex;gap:12px;align-items:center;margin-top:18px;
+  }
+  button.btn{
+    padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#021224;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(47,195,255,0.14);
+  }
+  button.ghost{
+    background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:10px 12px;border-radius:10px;
+  }
+
+  .timer{
+    margin-left:auto;font-size:13px;padding:8px 12px;border-radius:999px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* right - side info / book / score preview */
+  .side{
+    padding:18px;background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+    border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    display:flex;flex-direction:column;gap:12px;height:100%;
+  }
+  .side h3{margin:0;font-size:16px}
+  .score-pill{
+    font-size:36px;font-weight:800;letter-spacing:-1px;
+    color:var(--accent); text-shadow:0 6px 24px rgba(47,195,255,0.06);
+  }
+  .info{
+    color:var(--muted);font-size:13px;line-height:1.45;
+  }
+
+  footer.small{font-size:12px;color:rgba(255,255,255,0.55);margin-top:auto;text-align:center}
+
+  /* result panel */
+  .result{
+    text-align:center;padding:30px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.2));
+  }
+  .big{font-size:28px;font-weight:800;margin:6px 0}
+  .sub{color:var(--muted);margin-bottom:16px}
+
+  /* responsive */
+  @media (max-width:980px){
+    .card{grid-template-columns:1fr; padding:18px}
+    .logo{width:54px;height:54px;font-size:22px}
+  }
+</style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="overlay" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <main class="card" role="main" aria-labelledby="quizTitle">
+      <section class="quiz-area" id="quizArea">
+        <header class="title">
+          <div class="logo">M</div>
+          <div>
+            <h1 id="quizTitle">🧠 Project Merlin Quiz – Test Your Knowledge!</h1>
+            <p class="lead">10 questions • timed • save & resume • background matches your fantasy theme</p>
+          </div>
+        </header>
+
+        <div class="progress-wrap" aria-hidden="false">
+          <div class="progress" aria-hidden="true"><i id="progBar"></i></div>
+          <div class="meta" id="metaText">Q <span id="curQ">1</span>/10</div>
+        </div>
+
+        <div id="questionBox" class="question" role="region" aria-live="polite"></div>
+
+        <div class="options" id="optionsList" role="list"></div>
+
+        <div class="controls" aria-hidden="false">
+          <button class="ghost" id="prevBtn" title="Previous question" aria-label="Previous question">Previous</button>
+          <button class="ghost" id="nextBtn" title="Next question" aria-label="Next question">Next</button>
+          <button class="btn" id="submitBtn" title="Submit quiz" aria-label="Submit quiz">Submit Quiz</button>
+          <div class="timer" id="timer">30s</div>
+        </div>
+
+      </section>
+
+      <aside class="side" aria-labelledby="sideTitle">
+        <h3 id="sideTitle">Your Progress</h3>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="info">Answered</div>
+            <div class="score-pill" id="answeredCount">0 / 10</div>
+          </div>
+          <div style="height:12px"></div>
+          <div class="info">Tip: You can close and reopen — progress is saved in your browser.</div>
+        </div>
+
+        <div>
+          <h3>Time per question</h3>
+          <div class="info">Each question has a 30s timer; answer faster for a small bonus.</div>
+        </div>
+
+        <div style="margin-top:auto">
+          <footer class="small">Designed to match your fantasy background — colors and glow tuned for that look.</footer>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- result modal (hidden until submit) -->
+  <div id="resultModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(2,6,20,0.6);z-index:9999;padding:32px;">
+    <div style="max-width:720px;width:100%;border-radius:12px;padding:22px;background:linear-gradient(180deg,rgba(6,10,20,0.9),rgba(6,8,18,0.95));border:1px solid rgba(255,255,255,0.04);">
+      <div class="result" id="resultContent">
+        <div class="big" id="finalScore">Your Score: 0 / 10</div>
+        <div class="sub" id="finalPercent">0% — Keep learning, wizard!</div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+          <button class="btn" id="downloadCert">Download Certificate</button>
+          <button class="ghost" id="closeResult">Close</button>
+          <button class="ghost" id="retryBtn">Retry Quiz</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ------------ QUIZ DATA (from user) ------------ */
+/* If you want to change which options are correct, modify correctAnswers array indices (0-based index of option) */
+const questions = [
+  {
+    q: "1. What is the main mission of Project Merlin?",
+    opts: ["To host gaming tournaments","To promote community-driven crowdfunding and collaboration","To create meme tokens","To build centralized finance tools"]
+  },
+  {
+    q: "2. The $MRLN token is used for what purposes?",
+    opts: ["Governance and staking","Shopping discounts","Game credits","Only NFT minting"]
+  },
+  {
+    q: "3. What ecosystem model powers Project Merlin?",
+    opts: ["Centralized exchange model","DAO (Decentralized Autonomous Organization) model","AI cloud model","Traditional finance model"]
+  },
+  {
+    q: "4. What is Taskium mainly used for?",
+    opts: ["Web3 reward-based community tasks","NFT minting","Staking pools","Token swaps"]
+  },
+  {
+    q: "5. What role does Freelify play in the Project Merlin ecosystem?",
+    opts: ["A freelance marketplace connecting talent and projects","A gaming leaderboard","A token bridge","A crypto wallet"]
+  },
+  {
+    q: "6. What are the names of Project Merlin’s crowdfunding proposal systems?",
+    opts: ["Excalibur / Camelot","Taskium","Marketplace","Oracle"]
+  },
+  {
+    q: "7. What unique feature does Project Merlin’s NFT Marketplace offer?",
+    opts: ["Verified NFTs with royalty enforcement","Free airdrops","Anonymous minting","Burn-to-earn system"]
+  },
+  {
+    q: "8. Which is the official token ticker of Project Merlin?",
+    opts: ["MRLN","PRJ","MLN","PML"]
+  },
+  {
+    q: "9. In Project Merlin’s governance model, which token is used for proposals and voting?",
+    opts: ["Bitcoin","Ethereum","MRLN","BNB"]
+  },
+  {
+    q: "10. Which phrase best represents Project Merlin’s core vision?",
+    opts: ["“Build, Fund, and Grow Together”","“Trade Fast, Earn Faster”","“Mine the Future”","“Stake and Sleep”"]
+  }
+];
+
+/* Best-guess correct answers (0-based option index). Change as needed. */
+const correctAnswers = [1,0,1,0,0,0,0,0,2,0];
+
+/* ------------ App state ------------- */
+let state = {
+  cur: 0,
+  answers: Array(questions.length).fill(null), // store selected option index
+  timeLeft: 30,
+  timerInterval: null,
+  score: 0
+};
+
+const SAVE_KEY = "project_merlin_quiz_v1";
+
+/* ---------- Utilities ---------- */
+function $(sel){return document.querySelector(sel)}
+function $all(sel){return Array.from(document.querySelectorAll(sel))}
+
+/* ---------- Rendering ---------- */
+function renderQuestion(){
+  const qObj = questions[state.cur];
+  $('#curQ').textContent = state.cur + 1;
+  $('#questionBox').textContent = qObj.q;
+
+  const optionsList = $('#optionsList');
+  optionsList.innerHTML = '';
+  qObj.opts.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.setAttribute('role','button');
+    btn.setAttribute('tabindex','0');
+    btn.dataset.index = i;
+    btn.innerHTML = `<div style="width:18px;height:18px;border-radius:6px;background:rgba(255,255,255,0.05);display:inline-block;margin-right:8px"></div><div style="flex:1">${opt}</div>`;
+    if(state.answers[state.cur] === i) btn.classList.add('selected');
+    btn.addEventListener('click', () => {
+      selectOption(i);
+    });
+    btn.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' ') selectOption(i);
+    });
+    optionsList.appendChild(btn);
+  });
+
+  // progress bar
+  const pct = Math.round(((state.cur)/questions.length)*100);
+  $('#progBar').style.width = pct + '%';
+  $('#answeredCount').textContent = `${state.answers.filter(x=>x!==null).length} / ${questions.length}`;
+
+  // reset timer
+  resetTimer();
+}
+
+/* ---------- Option selection ---------- */
+function selectOption(optionIndex){
+  state.answers[state.cur] = optionIndex;
+  // visual
+  $all('.option').forEach(o => o.classList.remove('selected'));
+  const el = document.querySelector(`.option[data-index="${optionIndex}"]`);
+  if(el) el.classList.add('selected');
+
+  saveState();
+}
+
+/* ---------- Navigation ---------- */
+$('#prevBtn').addEventListener('click', () => {
+  if(state.cur === 0) return;
+  state.cur--;
+  renderQuestion();
+});
+$('#nextBtn').addEventListener('click', () => {
+  if(state.cur < questions.length - 1) {
+    state.cur++;
+    renderQuestion();
+  }
+});
+
+$('#submitBtn').addEventListener('click', () => {
+  if(!confirm('Submit quiz and view results?')) return;
+  submitQuiz();
+});
+
+/* ---------- Timer ---------- */
+function resetTimer(){
+  clearInterval(state.timerInterval);
+  state.timeLeft = 30;
+  $('#timer').textContent = state.timeLeft + 's';
+  state.timerInterval = setInterval(() => {
+    state.timeLeft--;
+    $('#timer').textContent = state.timeLeft + 's';
+    if(state.timeLeft <= 0){
+      clearInterval(state.timerInterval);
+      // auto move next if unanswered
+      if(state.answers[state.cur] === null) {
+        // mark as skipped (leave null) and go next
+      }
+      if(state.cur < questions.length - 1) {
+        state.cur++;
+        renderQuestion();
+      } else {
+        submitQuiz();
+      }
+    }
+  }, 1000);
+}
+
+/* ---------- Submit & Scoring ---------- */
+function submitQuiz(){
+  clearInterval(state.timerInterval);
+  // calculate score
+  let score=0;
+  for(let i=0;i<questions.length;i++){
+    if(state.answers[i] === correctAnswers[i]) score++;
+  }
+  state.score = score;
+  saveState(true); // clear saved progress
+  showResults();
+}
+
+function showResults(){
+  $('#finalScore').textContent = `Your Score: ${state.score} / ${questions.length}`;
+  const pct = Math.round((state.score/questions.length)*100);
+  $('#finalPercent').textContent = `${pct}% — ${ resultPhrase(pct) }`;
+  $('#resultModal').style.display = 'flex';
+}
+
+/* ---------- Results helpers ---------- */
+function resultPhrase(pct){
+  if(pct >= 90) return "Master of Merlin-level knowledge!";
+  if(pct >= 70) return "Strong — well done!";
+  if(pct >= 50) return "Good — keep practicing.";
+  return "Nice try — study the grimoire and retry!";
+}
+
+/* ---------- Persistence ---------- */
+function loadState(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if(!raw) return;
+  try{
+    const s = JSON.parse(raw);
+    if(s && s.answers && s.answers.length === questions.length){
+      state.answers = s.answers;
+      state.cur = s.cur || 0;
+      // allow resume
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function saveState(clear=false){
+  if(clear){
+    localStorage.removeItem(SAVE_KEY);
+    return;
+  }
+  const toSave = {
+    cur: state.cur,
+    answers: state.answers,
+    ts: Date.now()
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+}
+
+/* ---------- Certificate generation (simple) ---------- */
+$('#downloadCert').addEventListener('click', ()=> {
+  makeCertificate(state.score, questions.length);
+});
+
+function makeCertificate(score, total){
+  const canvas = document.createElement('canvas');
+  canvas.width = 1600; canvas.height = 900;
+  const ctx = canvas.getContext('2d');
+
+  // background
+  const g = ctx.createLinearGradient(0,0,0,900);
+  g.addColorStop(0, '#071627');
+  g.addColorStop(1, '#08102a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // glow header
+  ctx.fillStyle = 'rgba(47,195,255,0.06)';
+  ctx.fillRect(60,60,1480,160);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 54px Inter, Arial';
+  ctx.fillText('Project Merlin — Quiz Certificate', 120, 130);
+
+  // score box
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  ctx.fillRect(120,260,1360,420);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 120px Inter, Arial';
+  ctx.fillText(`${score}/${total}`, 180, 460);
+
+  ctx.font = '600 28px Inter, Arial';
+  ctx.fillText(`Awarded for completing the "Project Merlin Quiz"`, 180, 520);
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.font = '16px Inter, Arial';
+  ctx.fillText(`Generated on: ${new Date().toLocaleString()}`, 180, 560);
+
+  // download
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'MerlinQuiz_Certificate.png';
+  a.click();
+}
+
+/* ---------- Retry / close ---------- */
+$('#closeResult').addEventListener('click', ()=> {
+  $('#resultModal').style.display = 'none';
+});
+$('#retryBtn').addEventListener('click', ()=> {
+  state.answers = Array(questions.length).fill(null);
+  state.cur = 0;
+  state.score = 0;
+  saveState();
+  $('#resultModal').style.display = 'none';
+  renderQuestion();
+});
+
+/* ---------- keyboard shortcuts ---------- */
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') {
+    if(state.cur < questions.length - 1) { state.cur++; renderQuestion(); }
+  } else if(e.key === 'ArrowLeft') {
+    if(state.cur > 0) { state.cur--; renderQuestion(); }
+  } else if(e.key >= '1' && e.key <= '4') {
+    // quick select 1-4
+    const idx = parseInt(e.key) - 1;
+    selectOption(idx);
+  }
+});
+
+/* ---------- on load ---------- */
+window.addEventListener('load', ()=> {
+  const resumed = loadState();
+  renderQuestion();
+  if(resumed){
+    // offer resume prompt (non-blocking)
+    setTimeout(()=>{
+      if(confirm('We found a saved quiz progress. Would you like to resume?')) {
+        // keep state.cur from saved
+        renderQuestion();
+      } else {
+        localStorage.removeItem(SAVE_KEY);
+      }
+    }, 200);
+  } else {
+    saveState();
+  }
+});
+</script>
+</body>
+</html>
