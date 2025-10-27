@@ -131,6 +131,18 @@
   .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.2);}
   .result{text-align:center;margin-top:40px;}
   .result h2{font-size:28px;margin-bottom:10px;}
+  .share-btn{
+    margin-top:16px;
+    background:linear-gradient(90deg,#1DA1F2,#0074D9);
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:10px 20px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .2s;
+  }
+  .share-btn:hover{transform:scale(1.05);}
 </style>
 </head>
 <body>
@@ -159,7 +171,8 @@
     <div class="result" id="result" style="display:none;">
       <h2>Quiz Completed!</h2>
       <p id="scoreText"></p>
-      <button class="btn primary" onclick="restart()">Restart</button>
+      <button class="btn primary" onclick="restart()">Restart</button><br>
+      <button class="share-btn" id="shareBtn">Share on X (Twitter)</button>
     </div>
   </section>
 
@@ -173,11 +186,12 @@ const nextBtn = document.getElementById("nextBtn");
 const prevBtn = document.getElementById("prevBtn");
 const result = document.getElementById("result");
 const scoreText = document.getElementById("scoreText");
+const shareBtn = document.getElementById("shareBtn");
 
 let current = 0;
 let score = 0;
 
-// ✅ Updated answers with mixed correct options
+// ✅ Questions with mixed correct answers
 const questions = [
   {q:"What is Project Merlin primarily designed for?",a:["AI-driven productivity & workflow automation","Gaming platform","Social media analytics","Cloud storage system"],c:0},
   {q:"Which tech powers Merlin’s intelligent task execution?",a:["AI agents","Blockchain","Quantum computing","3D rendering"],c:0},
@@ -241,9 +255,17 @@ function showResult(){
   result.style.display="block";
   scoreText.textContent=`You scored ${score} out of ${questions.length}!`;
 }
+
 function restart(){
   score=0;current=0;
   showQuestion();
+}
+
+// 🐦 Share on X
+shareBtn.onclick = ()=>{
+  const tweet = encodeURIComponent(`I just scored ${score}/${questions.length} in the Project Merlin Quiz 🧙‍♂️ — Try it now!`);
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?text=${tweet}&url=${url}`,'_blank');
 }
 </script>
 </body>
