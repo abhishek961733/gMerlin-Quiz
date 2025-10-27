@@ -20,11 +20,11 @@
     overflow:hidden;
   }
 
-  /* ✨ Background setup */
+  /* ✨ Background */
   .bg{
     position:fixed;
     inset:0;
-    background:url("https://i.ibb.co/TxShJTKh/") no-repeat center center/cover;
+    background:url("https://i.ibb.co/7jXn3xKJ/merlin-bg.jpg") no-repeat center center/cover;
     z-index:-2;
     animation: zoomBg 30s ease-in-out infinite alternate;
   }
@@ -35,7 +35,6 @@
     backdrop-filter:blur(3px);
     z-index:-1;
   }
-
   @keyframes zoomBg {
     0% {transform:scale(1);}
     100% {transform:scale(1.08);}
@@ -178,17 +177,18 @@ const scoreText = document.getElementById("scoreText");
 let current = 0;
 let score = 0;
 
+// ✅ Updated answers with mixed correct options
 const questions = [
   {q:"What is Project Merlin primarily designed for?",a:["AI-driven productivity & workflow automation","Gaming platform","Social media analytics","Cloud storage system"],c:0},
   {q:"Which tech powers Merlin’s intelligent task execution?",a:["AI agents","Blockchain","Quantum computing","3D rendering"],c:0},
-  {q:"Can Merlin connect to external tools like Notion or Slack?",a:["Yes","No","Only paid users","Only via plugins"],c:0},
-  {q:"Which feature allows users to build interactive workflows?",a:["Canvas","Notebook","ChatGPT plugin","Template wizard"],c:0},
-  {q:"What does Merlin AI focus on?",a:["Productivity automation","Social networking","Streaming content","Finance tracking"],c:0},
-  {q:"Does Merlin support team collaboration?",a:["Yes","No","Only admins","Coming soon"],c:0},
-  {q:"Merlin uses what kind of interface?",a:["Visual no-code builder","Command line tool","Spreadsheet style","3D dashboard"],c:0},
-  {q:"What’s the benefit of Merlin’s agent system?",a:["Automate tasks easily","Play games","Post on social media","Mine crypto"],c:0},
-  {q:"Where can you use Project Merlin?",a:["Web browser","Mobile only","Desktop app only","Offline only"],c:0},
-  {q:"Is Project Merlin free to start?",a:["Yes","No","Trial only","Invite only"],c:0}
+  {q:"Can Merlin connect to external tools like Notion or Slack?",a:["No","Yes","Only paid users","Only via plugins"],c:1},
+  {q:"Which feature allows users to build interactive workflows?",a:["Template wizard","Canvas","Notebook","Plugin builder"],c:1},
+  {q:"What does Merlin AI focus on?",a:["Social networking","Productivity automation","Streaming content","Finance tracking"],c:1},
+  {q:"Does Merlin support team collaboration?",a:["No","Only admins","Yes","Coming soon"],c:2},
+  {q:"Merlin uses what kind of interface?",a:["Command line tool","Visual no-code builder","Spreadsheet style","3D dashboard"],c:1},
+  {q:"What’s the benefit of Merlin’s agent system?",a:["Mine crypto","Play games","Automate tasks easily","Post on social media"],c:2},
+  {q:"Where can you use Project Merlin?",a:["Offline only","Mobile only","Desktop app only","Web browser"],c:3},
+  {q:"Is Project Merlin free to start?",a:["Trial only","Yes","Invite only","No"],c:1}
 ];
 
 startBtn.onclick = ()=> {
